@@ -1,0 +1,157 @@
+Index: app/Providers/AppServiceProvider.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Providers/AppServiceProvider.php b/app/Providers/AppServiceProvider.php
+--- a/app/Providers/AppServiceProvider.php	(revision 2ec2b27d3c199d441abfa1bb1d0d2e6ac6cf1dc9)
++++ b/app/Providers/AppServiceProvider.php	(date 1621698869405)
+@@ -2,9 +2,9 @@
+ 
+ namespace App\Providers;
+ 
+-use Illuminate\Support\ServiceProvider;
+-
+ use Braintree\BraintreeConfiguration;
++use Braintree\Gateway;
++use Illuminate\Support\ServiceProvider;
+ 
+ class AppServiceProvider extends ServiceProvider
+ {
+@@ -25,9 +25,8 @@
+      */
+     public function boot()
+     {
+-        \Braintree\Configuration::environment(env('BTREE_ENVIRONMENT'));
+-        \Braintree\Configuration::merchantId(env('BTREE_MERCHANT_ID'));
+-        \Braintree\Configuration::publicKey(env('BTREE_PUBLIC_KEY'));
+-        \Braintree\Configuration::privateKey(env('BTREE_PRIVATE_KEY'));
++        $this->app->bind(Gateway::class, function ($app) {
++            return new Gateway($app['config']['braintree']);
++        });
+     }
+ }
+Index: app/Http/Controllers/Api/PaymentController.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Http/Controllers/Api/PaymentController.php b/app/Http/Controllers/Api/PaymentController.php
+--- a/app/Http/Controllers/Api/PaymentController.php	(revision 2ec2b27d3c199d441abfa1bb1d0d2e6ac6cf1dc9)
++++ b/app/Http/Controllers/Api/PaymentController.php	(date 1621699236031)
+@@ -3,20 +3,15 @@
+ namespace App\Http\Controllers\Api;
+ 
+ use App\Http\Controllers\Controller;
+-use Illuminate\Http\Request;
+ use Braintree\Gateway as Gateway;
++use Illuminate\Http\Request;
+ 
+ class PaymentController extends Controller
+ {
+-    public function pay(Request $request) {
++    public function pay(Request $request, Gateway $gateway)
++    {
+         $data = $request->all();
+ 
+-        $gateway = new Gateway([
+-            'environment' => 'sandbox',
+-            'merchantId' => '4wvx6k87m9sxq5k3',
+-            'publicKey' => 'p4rqqmp276684b36',
+-            'privateKey' => 'c7e93c2e0a9728be721a0140af83f1ae'
+-        ]);
+ 
+         $nonceFromTheClient = $data["payment_method_nonce"];
+ 
+@@ -26,11 +21,11 @@
+             'amount' => $data["amount"],
+             'paymentMethodNonce' => $nonceFromTheClient,
+             'options' => [
+-              'submitForSettlement' => true
++                'submitForSettlement' => true
+             ]
+-          ]);
++        ]);
+ 
+-          // return response()->json($result);
+-          return redirect()->route('payed');
++        // return response()->json($result);
++        return redirect()->route('payed');
+     }
+ }
+Index: .env.example
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.env.example b/.env.example
+--- a/.env.example	(revision 2ec2b27d3c199d441abfa1bb1d0d2e6ac6cf1dc9)
++++ b/.env.example	(date 1621698167184)
+@@ -13,6 +13,11 @@
+ DB_USERNAME=root
+ DB_PASSWORD=root
+ 
++PAYMENT_ENVIRONMENT=sandbox
++PAYMENT_MERCHANT_ID=4wvx6k87m9sxq5k3
++PAYMENT_PUBLIC_KEY=p4rqqmp276684b36
++PAYMENT_PRIVATE_KEY=c7e93c2e0a9728be721a0140af83f1ae
++
+ BROADCAST_DRIVER=log
+ CACHE_DRIVER=file
+ QUEUE_CONNECTION=sync
+Index: routes/web.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/routes/web.php b/routes/web.php
+--- a/routes/web.php	(revision 2ec2b27d3c199d441abfa1bb1d0d2e6ac6cf1dc9)
++++ b/routes/web.php	(date 1621699094691)
+@@ -1,8 +1,8 @@
+ <?php
+ 
+-use Illuminate\Support\Facades\Route;
++use Braintree\Gateway;
+ use Illuminate\Support\Facades\Auth;
+-use Braintree\Gateway as Gateway;
++use Illuminate\Support\Facades\Route;
+ 
+ 
+ /*
+@@ -19,6 +19,7 @@
+ //HOME
+ Route::get('/', 'RestaurantController@index')->name('home');
+ Route::get('/guests/payed', 'RestaurantController@payed')->name('payed');
++
+ //ROTTE UI
+ Route::get('/restaurants/{slug}', 'RestaurantController@show')->name('restaurants.show');
+ 
+@@ -30,7 +31,7 @@
+     ->namespace('Admin')
+     ->name('admin.')
+     ->middleware('auth')
+-    ->group(function() {
++    ->group(function () {
+         //Home admin
+         Route::get('/', 'HomeController@index')->name('home');
+ 
+@@ -41,16 +42,10 @@
+         Route::resource('foods', 'FoodController');
+     });
+ 
+-    //ROTTE PAGAMENTO
+-    // Route::get('/payment/make', 'PaymentsController@make')->name('payment.make');
++//ROTTE PAGAMENTO
++// Route::get('/payment/make', 'PaymentsController@make')->name('payment.make');
+ 
+-Route::get('/guests/payment', function () {
+-    $gateway = new Gateway([
+-        'environment' => 'sandbox',
+-        'merchantId' => '4wvx6k87m9sxq5k3',
+-        'publicKey' => 'p4rqqmp276684b36',
+-        'privateKey' => 'c7e93c2e0a9728be721a0140af83f1ae'
+-    ]);
++Route::get('/guests/payment', function (Gateway $gateway) {
+ 
+     $clientToken = $gateway->clientToken()->generate();
+ 

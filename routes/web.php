@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use Braintree\Gateway;
 use Illuminate\Support\Facades\Auth;
-use Braintree\Gateway as Gateway;
+use Illuminate\Support\Facades\Route;
 
 
 /*
@@ -19,6 +19,7 @@ use Braintree\Gateway as Gateway;
 //HOME
 Route::get('/', 'RestaurantController@index')->name('home');
 Route::get('/guests/payed', 'RestaurantController@payed')->name('payed');
+
 //ROTTE UI
 Route::get('/restaurants/{slug}', 'RestaurantController@show')->name('restaurants.show');
 
@@ -30,7 +31,7 @@ Route::prefix('admin')
     ->namespace('Admin')
     ->name('admin.')
     ->middleware('auth')
-    ->group(function() {
+    ->group(function () {
         //Home admin
         Route::get('/', 'HomeController@index')->name('home');
 
@@ -41,16 +42,10 @@ Route::prefix('admin')
         Route::resource('foods', 'FoodController');
     });
 
-    //ROTTE PAGAMENTO
-    // Route::get('/payment/make', 'PaymentsController@make')->name('payment.make');
+//ROTTE PAGAMENTO
+// Route::get('/payment/make', 'PaymentsController@make')->name('payment.make');
 
-Route::get('/guests/payment', function () {
-    $gateway = new Gateway([
-        'environment' => 'sandbox',
-        'merchantId' => '4wvx6k87m9sxq5k3',
-        'publicKey' => 'p4rqqmp276684b36',
-        'privateKey' => 'c7e93c2e0a9728be721a0140af83f1ae'
-    ]);
+Route::get('/guests/payment', function (Gateway $gateway) {
 
     $clientToken = $gateway->clientToken()->generate();
 
