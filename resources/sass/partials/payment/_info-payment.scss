@@ -1,0 +1,83 @@
+.box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin-top: -40px;
+    .wrapper {
+        width: 450px;
+        padding: 15px;
+        .input-data {
+            position: relative;
+            height: 40px;
+            width: 100%;
+            input {
+                height: 100%;
+                width: 100%;
+                border: none;
+                font-size: 17px;
+                border-bottom: 2px solid silver;
+                background: #f8fafc;
+                outline: none;
+            }
+            label {
+                position: absolute;
+                left: 0;
+                bottom: 10px;
+                color: $system2-col;
+                pointer-events: none;
+                transition: all 0.3s ease;
+            }
+            input:focus ~ label,
+            input:valid ~ label {
+                transform: translateY(-20px);
+                font-size: 15px;
+                color: $principal-col;
+            }
+            .underline {
+                position: absolute;
+                bottom: 0;
+                height: 2px;
+                width: 100%;
+                left: -50%;
+                &:before {
+                    position: absolute;
+                    content: "";
+                    height: 100%;
+                    width: 100%;
+                    background: $principal-col;
+                    transform: scaleX(0);
+                    transition: transform 0.3s ease;
+                }
+            }
+            input:focus ~ .underline:before,
+            input:valid ~ .underline:before {
+                transform: scaleX(1);
+            }
+        }
+    }
+    .payment {
+        display: flex;
+        justify-content: space-evenly;
+        align-items: center;
+        height: 100%;
+        color: $system2-col;
+        span {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .btn-pay {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .btn-total {
+            cursor: default;
+            background: none;
+            color: $system2-col;
+            &:hover {
+                background: none;
+                color: $system2-col;
+            }
+        }
+    }
+}

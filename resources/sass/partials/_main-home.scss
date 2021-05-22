@@ -1,0 +1,558 @@
+.restaurants-list {
+    .card {
+        position: relative;
+        border: none;
+        border-radius: 10px;
+        min-height: 350px;
+        overflow: hidden;
+        border-radius: 10px;
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
+        transition: box-shadow 250ms ease, background 150ms linear;
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background: $accent1-col;
+            transition: width 250ms ease;
+        }
+        &:hover {
+            box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
+            background: rgba($accent2-col, .8);
+            color: #fff;
+            h4 {
+                color: #fff;
+                &::after {
+                    width: 80%;
+                }
+            }
+            p {
+                color: rgba(255,255,255, .8);
+            }
+            &::after {
+                width: 80%;
+            }
+            small {
+                color: $accent1-col;
+            }
+        }
+        img {
+            height: 160px;
+            width: 100%;
+            object-fit: cover;
+        }
+        .description {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+    }
+    h4 {
+        position: relative;
+        color: $accent2-col;
+        transition: color 350ms linear;
+        &::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background: $accent1-col;
+            transition: width 250ms ease;
+        }
+    }
+    small, p {
+        color: $system2-col;
+        transition: color 200ms ease;
+    }
+}
+
+.title-col-accent {
+    color: $accent2-col;
+}
+//Genre
+.genre {
+    img {
+        border-radius: 15px;
+    }
+    span {
+        position: relative;
+        top: -28px;
+        left: 12px;
+        font-size: 1.1rem;
+        color: #fff;
+        text-shadow: 0 2px 4px rgba(0,0,0, .5);
+    }
+}
+.genre-responsive {
+    display: none;
+}
+
+//Selection Deliveroo
+.selection {
+    h2 {
+        color: $accent2-col;
+        font-weight: 700;
+    }
+    .content {
+        display: flex;
+        flex-wrap: wrap;
+        p {
+            text-align: left;
+            margin-top: 7px;
+            margin-bottom: 0;
+        }
+        a {
+            display: block;
+            text-align: left;
+            color: $principal-col;
+            &:hover {
+                color: $accent3-col;
+                text-decoration: none;
+            }
+        }
+        .comfort-food {
+            width: 40%;
+            margin-right: 20px;
+            .content-img {
+                background-image: url('/img/asset/comfort_food.jpg');
+                background-size: cover;
+                background-position: center;
+                max-height: 145px;
+                min-height: 145px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                opacity: none;
+                transition: opacity 300ms;
+                &:hover {
+                    opacity: .5;
+                    transition: opacity 300ms;
+                    cursor: pointer;
+                }
+                h3 {
+                    color: $white;
+                    font-weight: 700;
+                    font-size: 2rem;
+                    text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.8);
+                }
+            }
+        }
+        .dolci-dessert {
+            width: calc(60% - 20px);
+            .content-img {
+                background-image: url('/img/asset/dolci_dessert.jpg');
+                background-size: cover;
+                background-position: center;
+                max-height: 145px;
+                min-height: 145px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                opacity: none;
+                transition: opacity 300ms;
+                &:hover {
+                    opacity: .5;
+                    transition: opacity 300ms;
+                    cursor: pointer;
+                }
+                h3 {
+                    color: $white;
+                    font-weight: 700;
+                    font-size: 2rem;
+                    text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.8);
+                }
+            }
+        }
+        .perfect-to-share {
+            width: 60%;
+            margin-right: 20px;
+            margin-top: 20px;
+            .content-img {
+                background-image: url('/img/asset/perfetti_da_condividere.jpg');
+                background-size: cover;
+                background-position: center;
+                max-height: 145px;
+                min-height: 145px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                opacity: none;
+                transition: opacity 300ms;
+                &:hover {
+                    opacity: .5;
+                    transition: opacity 300ms;
+                    cursor: pointer;
+                }
+                h3 {
+                    color: $white;
+                    font-weight: 700;
+                    font-size: 2rem;
+                    text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.8);
+                }
+            }
+        }
+        .exclusive-deliveroo {
+            width: calc(40% - 20px);
+            margin-top: 20px;
+            .content-img {
+                background-image: url('/img/asset/esclusiva_deliveroo.jpg');
+                background-size: cover;
+                background-position: center;
+                max-height: 145px;
+                min-height: 145px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                opacity: none;
+                transition: opacity 300ms;
+                &:hover {
+                    opacity: .5;
+                    transition: opacity 300ms;
+                    cursor: pointer;
+                }
+                h3 {
+                    color: $white;
+                    font-weight: 700;
+                    font-size: 2rem;
+                    text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.8);
+                }
+            }
+        }
+    }
+}
+
+//Section news
+.news {
+    h2 {
+        color: $accent2-col;
+        font-weight: 700;
+    }
+    h4 {
+        font-weight: 700;
+        font-size: 2rem;
+    }
+    .card {
+        height: 200px;
+        display: flex;
+        flex-direction: row;
+        overflow: hidden;
+        .img-container {
+            width: 50%;
+            position: relative;
+            height: 100%;
+            img {
+                width: 100%;
+                height: 100%;
+                -o-object-fit: cover;
+                object-fit: cover;
+            }
+        }
+        .text-container {
+            flex-grow: 1;
+            position: relative;
+            padding: 40px;
+            &::after {
+                content: '';
+                width: 40px;
+                height: 120%;
+                background: #fff;
+                transform: rotate(6deg);
+                position: absolute;
+                left: -30px;
+                top: -10px;
+                z-index: 1;
+            }
+        }
+        .app {
+            &::after {
+                left: auto;
+                right: -25px;
+            }
+        }
+    }
+}
+
+//Section work with Deliveroo
+.work {
+    margin-top: 50px;
+    h2 {
+        color: $accent2-col;
+        font-weight: 700;
+    }
+    h5 {
+        font-weight: 700;
+        font-size: 2rem;
+        margin: 15px 0;
+    }
+    .card {
+        overflow: hidden;
+    }
+    .card-body {
+        position: relative;
+        min-height: 300px;
+        color: #fff;
+        &::after {
+            content: "";
+            width: 45px;
+            height: 120%;
+            transform: rotate(85deg);
+            position: absolute;
+            left: 150px;
+            top: -180px;
+            z-index: 1;
+        }
+        h5, p {
+            position: relative;
+            z-index: 2;
+        }
+        &.rider {
+            background: #ff483b;
+            &::after {
+                background: #ff483b;
+            }
+        }
+        &.ristoranti {
+            background: #ff8100;
+             &::after {
+                background: #ff8100;
+            }
+        }
+        &.lavoro {
+            background: #bac3c3;
+             &::after {
+                background: #bac3c3;
+            }
+        }
+    }
+}
+
+@media only screen and (max-width: 1024px) {
+    .no-restaurant {
+        margin-top: 50px;
+    }
+    //Genre
+    .genre {
+        ul {
+            display: none;
+        }
+    }
+    .genre-responsive {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        i {
+            display: block;
+            cursor: pointer;
+            color: $principal-col;
+            font-size: 30px;
+            position: absolute;
+            top: 0;
+        }
+        .drop-down {
+            display: block;
+            margin-top: 50px;
+            margin-left: -35px;
+            ul {
+                display: block;
+                list-style: none;
+                li {
+                    cursor: pointer;
+                    text-align: center;
+                    background-color: $principal-col;
+                    border-radius: 7px;
+                    color: $white;
+                    margin-top: 5px;
+                    padding: 2px;
+                }
+            }
+        }
+    }
+
+//Section news
+.news {
+    h2 {
+        color: $accent2-col;
+        font-weight: 700;
+    }
+    h4 {
+        font-weight: 700;
+        font-size: 2rem;
+    }
+    .card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        .img-container {
+            width: 100%;
+            position: relative;
+            height: 300px;
+            img {
+                width: 100%;
+                height: 100%;
+                -o-object-fit: cover;
+                object-fit: cover;
+            }
+        }
+        .text-container {
+            flex-grow: 1;
+            position: relative;
+            padding: 40px;
+            &::after {
+                display: none;
+            }
+        }
+        .app {
+            &::after {
+                left: auto;
+                right: -25px;
+            }
+        }
+    }
+}
+
+    .selection {
+        img {
+            width: 100%;
+            max-height: 130px;
+            min-height: 130px;
+        }
+        .content {
+            .comfort-food {
+                width: 50%;
+                margin-right: 10px;
+            }
+            .dolci-dessert {
+                width: calc(50% - 10px);
+            }
+            .perfect-to-share {
+                width: 50%;
+                margin-right: 10px;
+                margin-top: 20px;
+            }
+            .exclusive-deliveroo {
+                width: calc(50% - 10px);
+                margin-top: 20px;
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .work {
+        .card-body {
+            &::after {
+                content: "";
+                width: 65px;
+                height: 250%;
+                transform: rotate(89deg);
+                position: absolute;
+                left: 150px;
+                top: -370px;
+                z-index: 1;
+            }
+        }
+    }
+}
+
+@media only screen and (max-width: 575px) {
+    .hero {
+        .card {
+            margin: 0 auto;
+            width: 20rem;
+        }
+    }
+    .no-restaurant {
+        margin-top: 50px;
+    }
+
+    //Genre
+    .genre {
+        ul {
+            display: none;
+        }
+    }
+    .genre-responsive {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        i {
+            display: block;
+            cursor: pointer;
+            color: $principal-col;
+            font-size: 30px;
+            position: absolute;
+            top: 0;
+        }
+        .drop-down {
+            display: block;
+            margin-top: 50px;
+            margin-left: -35px;
+            ul {
+                display: block;
+                list-style: none;
+                li {
+                    cursor: pointer;
+                    text-align: center;
+                    background-color: $principal-col;
+                    border-radius: 7px;
+                    color: $white;
+                    margin-top: 5px;
+                    padding: 2px;
+                }
+            }
+        }
+    }
+
+    .selection {
+        img {
+            width: 100%;
+            max-height: 130px;
+            min-height: 130px;
+        }
+        .content {
+            .comfort-food {
+                width: 100%;
+                margin: 0 auto;
+                display: block;
+                a {
+                    margin-bottom: 20px;
+                }
+            }
+            .dolci-dessert {
+                width: 100%;
+                margin: 5px auto;
+                display: block;
+                a {
+                    margin-bottom: 20px;
+                }
+            }
+            .perfect-to-share {
+                width: 100%;
+                margin: 5px auto;
+                display: block;
+                a {
+                    margin-bottom: 20px;
+                }
+            }
+            .exclusive-deliveroo {
+                width: 100%;
+                margin: 5px auto;
+                display: block;
+                a {
+                    margin-bottom: 20px;
+                }
+            }
+        }
+
+    }
+}

@@ -1,0 +1,10 @@
+.auth-container {
+    // width: 1000px;
+    max-width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    .content p {
+        color: $system2-col;
+    }
+}

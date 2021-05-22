@@ -1,0 +1,87 @@
+.image-bg {
+    background: url('../img/asset/deliveroo.gif');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    height: 500px;
+    section {
+        height: 100%;
+    }
+}
+.hero {
+    position: relative;
+    height: 100%;
+    display: flex;
+    justify-content: flex-start;
+    .content {
+        position: absolute;
+        bottom: 30px;
+        min-height: 200px;
+        background: $white;
+        padding: 25px 18px;
+        border: 1px solid lightgray;
+        border-radius: 8px;
+        margin-top: 40px;
+        transform: translateX(-20px);
+        input {
+            color: $system2-col;
+            min-width: 80%;
+            height: 35px;
+            border: 0;
+            outline: none;
+            border-radius: 5px;
+            padding-left: 15px;
+            box-shadow: inset 2px 4px 8px rgba(0,0,0,.05),inset 0 0 0 100px #fff;
+            &:focus, &:hover {
+                background: $white;
+                border: 2px solid $principal-col;
+            }
+        }
+        i {
+            position: relative;
+            right: 35px;
+            color: $principal-col;
+        }
+        .lable-p {
+            display: flex;
+            justify-content: flex-start;
+            color: $system3-col;
+            margin-top: 10px;
+            .nav-link {
+                margin-right: 8px;
+                padding: 0;
+                color: $principal-col;
+            }
+        }
+
+    }
+}
+
+@media(max-width: 900px) {
+    .hero {
+        position: relative;
+        height: 100%;
+        display: flex;
+        justify-content: flex-start;
+        .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 300px;
+            input {
+                margin-bottom: 20px;
+                &:focus, &:hover {
+                    background: $white;
+                    border: 2px solid $principal-col;
+                }
+            }
+            i {
+                position: relative;
+                right: 35px;
+                color: $principal-col;
+            }
+        }
+    }
+}
+

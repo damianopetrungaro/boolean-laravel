@@ -1,0 +1,42 @@
+.footer {
+    background-color: $system1-col;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 0 150px;
+    color: $white;  
+    margin-top: 25px;  
+    .box-ft {
+        background-color: #434848;
+        width: calc((100% / 4) - 40px);
+        margin: 20px 20px;
+        padding: 20px;
+        flex-direction: column;
+        img {
+            width: 50%;
+            margin: 10px 0;
+        }
+        a {
+            color: $white;
+            &:hover {
+                color: $principal-col;
+                text-decoration: none;
+            }
+        }
+    }
+}
+@media only screen and (max-width: 1024px) {
+    .footer {
+        .box-ft {
+            width: calc((100% / 2) - 40px);
+        }
+    }
+}
+@media only screen and (max-width: 650px) {
+    .footer {
+        padding: 10px;
+        .box-ft {
+            width: 500px;
+        }
+    }
+}

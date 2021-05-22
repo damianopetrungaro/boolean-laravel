@@ -1,0 +1,100 @@
+// GENERAL STYLE
+body {
+    font-family: 'Roboto', sans-serif;
+    padding-top: 40px;
+}
+
+.menu-block {
+    display: block;
+    height: 100vh;
+    width: 100vw;
+    background: red;
+}
+
+a {
+    cursor: pointer;
+    color: $principal-col;
+}
+
+// Typhography
+.title {
+    font-weight: 700;
+    color: $accent2-col;
+}
+
+#navbarDropdown {
+    color: #00ccbb;
+}
+
+.text-principal {
+    color: #00ccbb;
+}
+
+// Buttons
+.btn i {
+   margin-right: 10px;
+}
+
+.btn-primary {
+    background-color: $principal-col;
+    border: 1px solid $principal-col;
+    transition: all 0.1s;
+}
+
+.btn-light {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 25px;
+    padding: 0 20px;
+}
+
+.btn-light:hover, .btn-light:focus {
+    color: $white;
+    background-color: $principal-col;
+    border: 1px solid $white;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    color: $principal-col;
+    background-color: $white;
+    border: 1px solid $principal-col;
+}
+
+.btn-warning {
+    color: $white;
+    background-color: $accent2-col;
+    border: 1px solid $accent2-col;
+    transition: all 0.1s;
+}
+
+.btn-warning:hover {
+    color: $accent2-col;
+    background-color: $white;
+    border: 1px solid $accent2-col;
+}
+
+.btn-danger {
+    background-color: $accent1-col;
+    border: 1px solid $accent1-col;
+    transition: all 0.1s;
+}
+
+.btn-danger:hover {
+    color: $accent1-col;
+    background-color: $white;
+    border: 1px solid $accent1-col;
+}
+
+/* TRANSITIONS */
+  .slide-down-fade-enter-active {
+    transition: all .3s ease;
+  }
+  .slide-down-fade-leave-active {
+    transition: all .1s ease;
+  }
+  .slide-down-fade-enter, .slide-down-fade-leave-to
+  /* .slide-fade-leave-active below version 2.1.8 */ {
+    transform: translateX(60px);
+    opacity: 0;
+  }

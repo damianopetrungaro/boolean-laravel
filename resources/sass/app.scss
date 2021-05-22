@@ -1,0 +1,33 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+//PARTIALS
+@import 'partials/common';
+@import 'partials/header';
+@import 'partials/header-admin';
+@import 'partials/main-home';
+@import 'partials/hero';
+@import 'partials/show-restaurant';
+@import 'partials/footer';
+
+
+//PARTIALS ADMIN
+@import 'partials/auth/auth-index';
+@import 'partials/auth/auth-show';
+@import 'partials/auth/auth-food-index';
+@import 'partials/auth/auth-food-show';
+
+//PARTIALS GUESTS
+@import 'partials/guests/food-show-guest';
+
+//Payment pages
+@import 'partials/payment/payed';
+@import 'partials/payment/info-payment';
+
+
