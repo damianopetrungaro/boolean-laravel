@@ -19,12 +19,14 @@ class Food extends Model
     ];
 
     //Relazione del DB: FOODS - RESTAURANT
-    public function Restaurant() {
-        return $this->belongsTo('App\Restaurant');
+    public function Restaurant()
+    {
+        return $this->belongsTo(Restaurant::class);
     }
 
-    //Relazione del DB: FOODS - ORDERS 
-    public function Orders() {
-        return $this->belongsToMany('App\Order');
+    //Relazione del DB: FOODS - ORDERS
+    public function Orders()
+    {
+        return $this->belongsToMany(Order::class);
     }
 }

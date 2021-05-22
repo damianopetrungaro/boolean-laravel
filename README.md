@@ -1,17 +1,12 @@
 # Laravel like a pro
 
-### Mantieni il tuo progetto pronto a funzionare in locale
-- cp .env.example .env.
-- php composer.phar install
-- php artisan key:generate
-- docker-compose up (MySQL) + crea il database `deliveroo`
-- php artisan migrate
-- php artisan db:seed
+### Iniziamo a vedere i Model
 
 ___
 
-feat-1.patch
+feat-2.patch
 Problemi:
-- Seed mancanti
-- Ordine dei seed 
-- Devono essere idempotenti
+    - Ha commenti: non sono il male perchè doocumentano ma devono essere aggiornati ed alcuni soo ridondanti
+    - PHP ha un suo stile! PSR-1, PSR-2 e PSR-12 spiegano come utilizzarlo https://www.php-fig.org (nomi dei metodi, parentesi)
+    - Utilizzare stringhe invece di ::class per i namespace 
+
