@@ -2,93 +2,80 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Restaurant;
 use App\Genre;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminRestaurantRequest;
+use App\Restaurant;
+use App\Services\ImageStore;
+use App\Services\SlugWithDash;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\View\View;
 
 class RestaurantController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(): View
     {
         //Get data-Restaurants from DB
         $restaurants = Restaurant::where('user_id', Auth::id())
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        $genres = Genre::all();
-
-        return view('admin.restaurants.index', compact('restaurants', 'genres'));
+        return view('admin.restaurants.index', compact('restaurants'));
     }
 
     /**
      * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(): View
     {
         $genres = Genre::all();
-        // dd($genres);
 
         return view('admin.restaurants.create', compact('genres'));
     }
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(
+        AdminRestaurantRequest $request,
+        ImageStore $imageStore,
+        SlugWithDash $slugWithDash
+    ): RedirectResponse
     {
         $data = $request->all();
 
-        //VALIDAZIONE
-        $request->validate($this->ruleValidation());
-
         // Salvare immagine in locale
-        if(!empty($data['path_img'])){
-            $data['path_img'] = Storage::disk('public')->put('images' , $data['path_img']);
+        if (!empty($data['path_img'])) {
+            $data['path_img'] = $imageStore->save($request->file('path_img'));
         }
 
         //SALVO DATI A DB
         $data['user_id'] = Auth::id(); //attraverso AUTH generiamo lo slug del ristorante nella fase di autenticazione.
 
-        $data['slug'] = Str::slug($data['name'], '-');
+        $data['slug'] = $slugWithDash($data['name']);
 
         $newRestaurant = new Restaurant();
         $newRestaurant->fill($data);  //Facciamo fillable nel model!!!
 
-        $saved = $newRestaurant->save();
-
-        if($saved) {
-
-            if(!empty($data['genres'])) {
-                $newRestaurant->genres()->attach($data['genres']);
-            }
-
-            return redirect()->route('admin.restaurants.index');
-        } else {
+        if (!$newRestaurant->save()) {
             return redirect()->route('admin.home');
-        } //DA RIVEDERE ERRORS...
+        }
+
+        if (!empty($data['genres'])) {
+            $newRestaurant->genres()->attach($data['genres']);
+        }
+
+        return redirect()->route('admin.restaurants.index');
     }
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function show($slug)
+    public function show(string $slug): View
     {
         $restaurant = Restaurant::where('slug', $slug)->first();
 
@@ -97,11 +84,8 @@ class RestaurantController extends Controller
 
     /**
      * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function edit(Restaurant $restaurant)
+    public function edit(Restaurant $restaurant): View
     {
         $genres = Genre::all();
 
@@ -110,96 +94,56 @@ class RestaurantController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Restaurant $restaurant)
+    public function update(
+        AdminRestaurantRequest $request,
+        Restaurant $restaurant,
+        ImageStore $imageStore,
+        SlugWithDash $slugWithDash): RedirectResponse
     {
         //Dati inviati dalla form di aggiornamento
         $data = $request->all();
 
-        ///VALIDAZIONE
-        $request->validate($this->ruleValidation());
-
         //SLUG
-        $data['slug'] = Str::slug($data['name'], '-');
+        $data['slug'] = $slugWithDash($data['name']);
 
-        // Salvare immagine in locale
-        if(!empty($data['path_img'])) {
+        $data['path_img'] = $imageStore->replace($restaurant->path_img, $request->file('path_img'));
 
-            //Cancella l'immagine eventualmente precedente
-            if(!empty($restaurant->path_img)) {
-                Storage::disk('public')->delete($restaurant->path_img);
-            }
-            $data['path_img'] = Storage::disk('public')->put('images', $data['path_img']);
+        if (!$restaurant->update($data)) {
+            return redirect()->route('admin.home');
         }
 
-
-        //AGGIORNO DATI A DB
-        // $data['user_id'] = Auth::id(); //attraverso AUTH generiamo lo slug del ristorante nella fase di autenticazione.
-
-        // $newRestaurant = new Restaurant();
-        // $newRestaurant->fill($data);  //Facciamo fillable nel model!!!
-
-        $updated = $restaurant->update($data);
-
-        if($updated) {
-
-            if (!empty($data['genres'])) {
-                //Sincronizza con precedenti generi indicati
-                $restaurant->genres()->sync($data['genres']);
-            } else {
-                //Se non c'è sync con precedenti generi indicati elimina i vecchi
-                $restaurant->genres()->detach();
-            }
-
-            return redirect()->route('admin.restaurants.index');
+        if (!empty($data['genres'])) {
+            //Sincronizza con precedenti generi indicati
+            $restaurant->genres()->sync($data['genres']);
         } else {
-            return redirect()->route('admin.home');
-        } //DA RIVEDERE ERRORS...
+            //Se non c'è sync con precedenti generi indicati elimina i vecchi
+            $restaurant->genres()->detach();
+        }
+
+        return redirect()->route('admin.restaurants.index');
+
     }
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
-    public function destroy(Restaurant $restaurant)
+    public function destroy(Restaurant $restaurant, ImageStore $imageStore): RedirectResponse
     {
-        $ref = $restaurant->name;
         $image = $restaurant->path_img;
 
         $restaurant->genres()->detach();
 
-        $deleted = $restaurant->delete();
-
-        if($deleted) {
-            if(!empty($image)) {
-                Storage::disk('public')->delete($image);
-            }
-            return redirect()->route('admin.restaurants.index')->with('deleted', $ref);
-        } else {
+        if (!$restaurant->delete()) {
             return redirect()->route('admin.home');
         }
 
-    }
+        if (!empty($image)) {
+            $imageStore->delete($image);
+        }
 
-    //UTILITY FUNCTIONS
-    private function ruleValidation() {
-        return [
-            //QUA STABILIAMO LE INFO RICHIESTE PER PROCEDERE
-            'name' => 'required | max: 100',
-            // 'slug'=>notnull();
-            'email' => 'required | max: 50',
-            'phone_number' => 'required | max: 30',
-            'vat_number' => 'required | max: 11',
-            'address' => 'required | max: 50',
-            'description' => 'required',
-            'path_img' => 'image',
-        ];
+        return redirect()->route('admin.restaurants.index')->with('deleted', $restaurant->name);
+
     }
 }
 

@@ -26,7 +26,7 @@
     </div>
     <div class="restaurant-info">
         <div class="contacts card">
-            <img src="{{asset('storage/' . $restaurant->path_img)}}" alt="{{$restaurant->name}}">
+            <img src="{{asset($restaurant->path_img)}}" alt="{{$restaurant->name}}">
         </div>
         <div class="text">
             <h3 class="text-bold">Contatti: </h3>
@@ -51,7 +51,7 @@
                         </div>
                         @if (!empty($food->path_img))
                             <div class="image">
-                                <img class="mt-2" src="{{asset('storage/' . $food->path_img)}}" alt="{{$food->name}}">
+                                <img class="mt-2" src="{{asset($food->path_img)}}" alt="{{$food->name}}">
                             </div>
                         @else
                         @endif
@@ -80,31 +80,6 @@
         </div>
     </div>
 </section>
-
-
-
-
-
-
-
-
-
-{{-- <div class="container">
-    <div class="row">
-        @foreach ($restaurant->foods as $food)
-        <div class="col-sm-12 col-md-6 col-lg-4 text-center">
-            <ul class="mt-4 list-unstyled list-group-item">
-                <img class="mb-2 mt-2" width="160" height="170" src="{{asset('storage/' . $food->path_img)}}" alt="{{$food->name}}">
-                <h5 class="card-text">{{$food->name}}</h5>
-                <p class="card-text">{{$food->ingredients}}</p>
-                <p class="card-text">{{$food->price}} €</p>
-                <a href="#" @click="addCart({{$food}})">Aggiungi al carrello</a>
-            </ul>
-        </div>
-        @endforeach
-    </div>
-</div> --}}
-
 
 {{-- Footer --}}
 @include('partials.footer')
