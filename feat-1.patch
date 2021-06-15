@@ -1,0 +1,20 @@
+Index: database/seeds/DatabaseSeeder.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/database/seeds/DatabaseSeeder.php b/database/seeds/DatabaseSeeder.php
+--- a/database/seeds/DatabaseSeeder.php	(revision c96c15e7a66256057c29d48d30759fcb799a38f5)
++++ b/database/seeds/DatabaseSeeder.php	(date 1621694888633)
+@@ -12,7 +12,10 @@
+     public function run()
+     {
+         $this->call([
++            UsersTableSeeder::class,
+             GenresTableSeeder::class,
+-            ]);
++            RestaurantsTableSeeder::class,
++            FoodsTableSeeder::class,
++        ]);
+     }
+ }
