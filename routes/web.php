@@ -18,10 +18,9 @@ use Illuminate\Support\Facades\Route;
 
 //HOME
 Route::get('/', 'RestaurantController@index')->name('home');
-Route::get('/guests/payed', 'RestaurantController@payed')->name('payed');
 
 //ROTTE UI
-Route::get('/restaurants/{slug}', 'RestaurantController@show')->name('restaurants.show');
+Route::get('/restaurants/{restaurant:slug}', 'RestaurantController@show')->name('restaurants.show');
 
 //ROTTE PER LOGIN / REGISTRAZIONE
 Auth::routes();
@@ -44,11 +43,6 @@ Route::prefix('admin')
 
 //ROTTE PAGAMENTO
 // Route::get('/payment/make', 'PaymentsController@make')->name('payment.make');
-
-Route::get('/guests/payment', function (Gateway $gateway) {
-
-    $clientToken = $gateway->clientToken()->generate();
-
-    return view('guests.payment', compact('clientToken'));
-})->name('pay');
+Route::get('/guests/paid', 'PaymentControllerController@paid')->name('paid');
+Route::get('/guests/payment', 'PaymentController@payment')->name('pay');
 

@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Braintree\Gateway as Gateway;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
-    public function pay(Request $request, Gateway $gateway)
+    public function pay(Request $request, Gateway $gateway): RedirectResponse
     {
         $data = $request->all();
 
@@ -26,6 +27,6 @@ class PaymentController extends Controller
         ]);
 
         // return response()->json($result);
-        return redirect()->route('payed');
+        return redirect()->route('paid');
     }
 }

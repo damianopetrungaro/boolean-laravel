@@ -2,31 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Restaurant;
-use App\Food;
+use Illuminate\View\View;
 
 class RestaurantController extends Controller
 {
-    public function index() {
+    public function index(): View
+    {
         $restaurants = Restaurant::orderBy('id', 'asc')->get();
-        
+
         return view('guests.home', compact('restaurants'));
     }
 
-    public function show($slug) {
-        $restaurant = Restaurant::where('slug', $slug)->first();
-        $foods = Food::all();
-
-        if (empty($restaurant)) {
-            abort(404);
-        } //DA PERSONALIZZARE
-
-        return view('guests.restaurants.show', compact('restaurant', 'foods'));
-    }
-
-    public function payed()
+    public function show(Restaurant $restaurant): View
     {
-        return view('guests.payed');
+        return view('guests.restaurants.show', compact('restaurant'));
     }
 }

@@ -1,0 +1,906 @@
+Index: app/Http/Controllers/HomeController.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Http/Controllers/HomeController.php b/app/Http/Controllers/HomeController.php
+--- a/app/Http/Controllers/HomeController.php	(revision 4825edaf5b6397405df277a41f87dd5d2cb8602c)
++++ b/app/Http/Controllers/HomeController.php	(date 1623777103930)
+@@ -2,11 +2,12 @@
+ 
+ namespace App\Http\Controllers;
+ 
+-use Illuminate\Http\Request;
++use Illuminate\View\View;
+ 
+ class HomeController extends Controller
+ {
+-    public function index() {
++    public function index(): View
++    {
+         return view('guests.home');
+     }
+ }
+Index: README.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/README.md b/README.md
+--- a/README.md	(revision 4825edaf5b6397405df277a41f87dd5d2cb8602c)
++++ b/README.md	(date 1623776780986)
+@@ -1,10 +1,22 @@
+ # Laravel like a pro
+ 
+-### Vediamo le rotte
++### Vediamo i controller
+ 
+ ___
+ 
+-feat-3.patch
++feat-4.patch
+ Problemi:
+-    - Usi una configurazione hardcoded
+-    - Se ho necessità di creare un Gateway in un altro classe dovro duplicare il codice di creazione
++    /RestaurantController:  
++        - show() può sfruttare il model binding di Laravel con una custom key (slug usato come chiave)
++        - show() restaurant ha un problemino di performance
++            - prima: https://blackfire.io/profiles/c30ee29b-d76d-4e94-913a-021874f406ea/graph
++            - dopo: https://blackfire.io/profiles/b9e48138-791d-4bf4-b40b-e4eb9f6e472d/graph
++        - si occupa dei pagamenti... perchè? Creiamo un PaymentController
++    /Admin/DeliveryController:
++        - logica un filo complessa, ripuliamo variabili e rendiamola semplice
++    /Admin/FoodController:
++        - ci sono logiche piu volte ripetute, creiamo dei services e delle custom Request
++        - logica un filo complessa, ripuliamo variabili e rendiamola semplice
++    /Admin/RestaurantController:
++        - ci sono logiche piu volte ripetute, creiamo dei services e delle custom Request
++        - logica un filo complessa, ripuliamo variabili e rendiamola semplice
+Index: resources/views/guests/restaurants/show.blade.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/resources/views/guests/restaurants/show.blade.php b/resources/views/guests/restaurants/show.blade.php
+--- a/resources/views/guests/restaurants/show.blade.php	(revision 4825edaf5b6397405df277a41f87dd5d2cb8602c)
++++ b/resources/views/guests/restaurants/show.blade.php	(date 1623775918931)
+@@ -26,7 +26,7 @@
+     </div>
+     <div class="restaurant-info">
+         <div class="contacts card">
+-            <img src="{{asset('storage/' . $restaurant->path_img)}}" alt="{{$restaurant->name}}">
++            <img src="{{asset($restaurant->path_img)}}" alt="{{$restaurant->name}}">
+         </div>
+         <div class="text">
+             <h3 class="text-bold">Contatti: </h3>
+@@ -51,7 +51,7 @@
+                         </div>
+                         @if (!empty($food->path_img))
+                             <div class="image">
+-                                <img class="mt-2" src="{{asset('storage/' . $food->path_img)}}" alt="{{$food->name}}">
++                                <img class="mt-2" src="{{asset($food->path_img)}}" alt="{{$food->name}}">
+                             </div>
+                         @else
+                         @endif
+@@ -81,31 +81,6 @@
+     </div>
+ </section>
+ 
+-
+-
+-
+-
+-
+-
+-
+-
+-{{-- <div class="container">
+-    <div class="row">
+-        @foreach ($restaurant->foods as $food)
+-        <div class="col-sm-12 col-md-6 col-lg-4 text-center">
+-            <ul class="mt-4 list-unstyled list-group-item">
+-                <img class="mb-2 mt-2" width="160" height="170" src="{{asset('storage/' . $food->path_img)}}" alt="{{$food->name}}">
+-                <h5 class="card-text">{{$food->name}}</h5>
+-                <p class="card-text">{{$food->ingredients}}</p>
+-                <p class="card-text">{{$food->price}} €</p>
+-                <a href="#" @click="addCart({{$food}})">Aggiungi al carrello</a>
+-            </ul>
+-        </div>
+-        @endforeach
+-    </div>
+-</div> --}}
+-
+-
+ {{-- Footer --}}
+ @include('partials.footer')
+ @endsection
+Index: app/Http/Controllers/RestaurantController.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Http/Controllers/RestaurantController.php b/app/Http/Controllers/RestaurantController.php
+--- a/app/Http/Controllers/RestaurantController.php	(revision 4825edaf5b6397405df277a41f87dd5d2cb8602c)
++++ b/app/Http/Controllers/RestaurantController.php	(date 1623777090236)
+@@ -2,31 +2,20 @@
+ 
+ namespace App\Http\Controllers;
+ 
+-use Illuminate\Http\Request;
+ use App\Restaurant;
+-use App\Food;
++use Illuminate\View\View;
+ 
+ class RestaurantController extends Controller
+ {
+-    public function index() {
++    public function index(): View
++    {
+         $restaurants = Restaurant::orderBy('id', 'asc')->get();
+-        
++
+         return view('guests.home', compact('restaurants'));
+     }
+ 
+-    public function show($slug) {
+-        $restaurant = Restaurant::where('slug', $slug)->first();
+-        $foods = Food::all();
+-
+-        if (empty($restaurant)) {
+-            abort(404);
+-        } //DA PERSONALIZZARE
+-
+-        return view('guests.restaurants.show', compact('restaurant', 'foods'));
+-    }
+-
+-    public function payed()
++    public function show(Restaurant $restaurant): View
+     {
+-        return view('guests.payed');
++        return view('guests.restaurants.show', compact('restaurant'));
+     }
+ }
+Index: app/Http/Controllers/Api/PaymentController.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Http/Controllers/Api/PaymentController.php b/app/Http/Controllers/Api/PaymentController.php
+--- a/app/Http/Controllers/Api/PaymentController.php	(revision 4825edaf5b6397405df277a41f87dd5d2cb8602c)
++++ b/app/Http/Controllers/Api/PaymentController.php	(date 1623777079848)
+@@ -4,11 +4,12 @@
+ 
+ use App\Http\Controllers\Controller;
+ use Braintree\Gateway as Gateway;
++use Illuminate\Http\RedirectResponse;
+ use Illuminate\Http\Request;
+ 
+ class PaymentController extends Controller
+ {
+-    public function pay(Request $request, Gateway $gateway)
++    public function pay(Request $request, Gateway $gateway): RedirectResponse
+     {
+         $data = $request->all();
+ 
+@@ -26,6 +27,6 @@
+         ]);
+ 
+         // return response()->json($result);
+-        return redirect()->route('payed');
++        return redirect()->route('paid');
+     }
+ }
+Index: app/Http/Controllers/Api/DeliverooController.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Http/Controllers/Api/DeliverooController.php b/app/Http/Controllers/Api/DeliverooController.php
+--- a/app/Http/Controllers/Api/DeliverooController.php	(revision 4825edaf5b6397405df277a41f87dd5d2cb8602c)
++++ b/app/Http/Controllers/Api/DeliverooController.php	(date 1623777072150)
+@@ -2,46 +2,37 @@
+ 
+ namespace App\Http\Controllers\Api;
+ 
++use App\Food;
++use App\Genre;
+ use App\Http\Controllers\Controller;
+-use Illuminate\Support\Facades\DB;
+-use Illuminate\Http\Request;
+ use App\Restaurant;
+-use App\Genre;
+-use App\Food;
++use Illuminate\Http\JsonResponse;
++use Illuminate\Http\Request;
+ 
+ class DeliverooController extends Controller
+ {
+-    public function index(Request $request) 
++    public function index(Request $request): JsonResponse
+     {
+         $data = $request->all();
+-        if(empty($data['genre'])) {
+-
+-            $restaurants = DB::table('restaurants')
+-            ->orderBy('created_at', 'asc')
+-            ->get();
++        if (empty($data['genre'])) {
++            $restaurants = Restaurant::orderBy('created_at')->get();
++        } else {
++            $restaurants = Restaurant::whereHas('genres', function ($q) use ($data) {
++                $q->whereIn('type', $data['genre']);
++            })->get();
+         }
+-        elseif (!empty($data['genre'])) 
+-        {
+-            $restaurants = [];
+-            $genresId = [];
+ 
+-            $genresId = $data['genre'];
+-            foreach ($genresId as $genre) {
+-                $restaurants = Restaurant::whereHas('genres', function($q) use ($genresId) 
+-                {
+-                    $q->whereIn('type', $genresId);
+-                }, '=', count($genresId))->get();
+-            }
+-        }
+         return response()->json($restaurants);
+     }
+ 
+-    public function food() {
++    public function food(): JsonResponse
++    {
+         $foods = Food::all();
+         return response()->json($foods);
+     }
+ 
+-    public function genre() {
++    public function genre(): JsonResponse
++    {
+         $genres = Genre::all();
+         return response()->json($genres);
+     }
+Index: resources/views/admin/foods/index.blade.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/resources/views/admin/foods/index.blade.php b/resources/views/admin/foods/index.blade.php
+--- a/resources/views/admin/foods/index.blade.php	(revision 4825edaf5b6397405df277a41f87dd5d2cb8602c)
++++ b/resources/views/admin/foods/index.blade.php	(date 1623769738259)
+@@ -7,58 +7,6 @@
+ @section('content')
+ {{-- HEADER --}}
+ @include('partials.header-admin')
+-{{-- <div class="container">
+-
+-    @if (session('deleted'))
+-    <div class="alert alert-danger">
+-        {{ session('deleted') }} Piatto eliminato con successo.
+-    </div>
+-    @endif
+-
+-    @if ($foods->isEmpty())
+-        <p>Non è ancora stato creato nessun piatto!</p>
+-    @endif
+-
+-
+-    <div class="d-flex justify-content-start mb-5">
+-        <a class="btn btn-primary" href="{{route('admin.foods.create')}}">Aggiungi piatto</a>
+-    </div>
+-    <ul class="auth-container">
+-        <table class="table">
+-            <thead class="bg">
+-                <tr>
+-                    <th>ID</th>
+-                    <th scope="col">Foto</th>
+-                    <th scope="col">Nome piatto</th>
+-                    <th scope="col">Creato</th>
+-                    <th scope="col">|</th>
+-                    <th colspan="10">Azioni</th>
+-                </tr>
+-            </thead>
+-            <tbody>
+-                @foreach ($foods as $food)
+-                    <tr>
+-                        <th scope="row">{{$food->id}}</th>
+-                        <td><img width="80" src="{{asset('storage/' . $food->path_img)}}" alt="{{$food->name}}"></td>
+-                        <td>{{$food->name}}</td>
+-                        <td>{{$food->created_at->format('d/m/Y')}}</td>
+-                        <td> <a class="btn btn-primary" href="{{ route('admin.foods.show', $food->slug) }}">Mostra piatto</a></td>
+-                        <td> <a class="btn btn-warning" href="{{ route('admin.foods.edit', $food->id) }}">Modifica piatto</a></td>
+-                        <td>
+-                        <form action="{{ route('admin.foods.destroy', $food->id) }}" method="POST">
+-                            @csrf
+-                            @method('DELETE')
+-
+-                            <input type="submit" class="btn btn-danger" value="Elimina piatto">
+-                        </form>
+-                        </td>
+-                    </tr>
+-                @endforeach
+-            </tbody>
+-        </table>
+-    </ul>
+-</div> --}}
+-
+ 
+ 
+ <div class="container">
+@@ -103,31 +51,6 @@
+         </div>
+     </div>
+ </div>
+-
+-
+-    {{-- VERSIONE CON CLASSE CARD BOOTSTRAP --}}
+-      {{-- <div class="row">
+-        <div class="col-sm">
+-            @foreach ($foods as $food)
+-                <div class="card" style="width: 18rem;">
+-                    <img class="card-img-top" src="{{asset('storage/' . $food->path_img)}}" alt="{{$food->name}}">
+-                    <div class="card-body">
+-                        <p class="card-text pl-1">Nome: {{$food->name}}</p>
+-                        <p class="card-text pl-1">Creato il: {{$food->created_at->format('d/m/Y')}}</p>
+-                        <div class="d-flex justify-content-center">
+-                            <a class="btn btn-primary mr-3" href="{{ route('admin.foods.show', $food->slug) }}">Dettaglio</a>
+-                            <a class="btn btn-warning mr-3" href="{{ route('admin.foods.edit', $food->id) }}">Modifica</a>
+-                            <form action="{{ route('admin.foods.destroy', $food->id) }}" method="POST">
+-                                @csrf
+-                                @method('DELETE')
+-
+-                                <input type="submit" class="btn btn-danger" value="Elimina">
+-                            </form>
+-                        </div>
+-                    </div>
+-            @endforeach
+-        </div>
+-    </div> --}}
+ 
+ 
+ @endsection
+Index: routes/web.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/routes/web.php b/routes/web.php
+--- a/routes/web.php	(revision 4825edaf5b6397405df277a41f87dd5d2cb8602c)
++++ b/routes/web.php	(date 1623689584813)
+@@ -18,10 +18,9 @@
+ 
+ //HOME
+ Route::get('/', 'RestaurantController@index')->name('home');
+-Route::get('/guests/payed', 'RestaurantController@payed')->name('payed');
+ 
+ //ROTTE UI
+-Route::get('/restaurants/{slug}', 'RestaurantController@show')->name('restaurants.show');
++Route::get('/restaurants/{restaurant:slug}', 'RestaurantController@show')->name('restaurants.show');
+ 
+ //ROTTE PER LOGIN / REGISTRAZIONE
+ Auth::routes();
+@@ -44,11 +43,6 @@
+ 
+ //ROTTE PAGAMENTO
+ // Route::get('/payment/make', 'PaymentsController@make')->name('payment.make');
+-
+-Route::get('/guests/payment', function (Gateway $gateway) {
+-
+-    $clientToken = $gateway->clientToken()->generate();
+-
+-    return view('guests.payment', compact('clientToken'));
+-})->name('pay');
++Route::get('/guests/paid', 'PaymentControllerController@paid')->name('paid');
++Route::get('/guests/payment', 'PaymentController@payment')->name('pay');
+ 
+Index: app/Http/Controllers/Admin/HomeController.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Http/Controllers/Admin/HomeController.php b/app/Http/Controllers/Admin/HomeController.php
+--- a/app/Http/Controllers/Admin/HomeController.php	(revision 4825edaf5b6397405df277a41f87dd5d2cb8602c)
++++ b/app/Http/Controllers/Admin/HomeController.php	(date 1623777007888)
+@@ -3,11 +3,12 @@
+ namespace App\Http\Controllers\Admin;
+ 
+ use App\Http\Controllers\Controller;
+-use Illuminate\Http\Request;
++use Illuminate\View\View;
+ 
+ class HomeController extends Controller
+ {
+-    public function index() {
++    public function index():View
++    {
+         return view('home');
+     }
+ }
+Index: app/Http/Controllers/Admin/FoodController.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Http/Controllers/Admin/FoodController.php b/app/Http/Controllers/Admin/FoodController.php
+--- a/app/Http/Controllers/Admin/FoodController.php	(revision 4825edaf5b6397405df277a41f87dd5d2cb8602c)
++++ b/app/Http/Controllers/Admin/FoodController.php	(date 1623777042413)
+@@ -2,13 +2,14 @@
+ 
+ namespace App\Http\Controllers\Admin;
+ 
+-use App\Http\Controllers\Controller;
+-use Illuminate\Http\Request;
+ use App\Food;
+-use App\Restaurant;
++use App\Http\Controllers\Controller;
++use App\Http\Requests\AdminFoodRequest;
++use App\Services\ImageStore;
++use App\Services\SlugWithDash;
++use Illuminate\Http\RedirectResponse;
+ use Illuminate\Support\Facades\Auth;
+-use Illuminate\Support\Facades\Storage;
+-use Illuminate\Support\Str;
++use Illuminate\View\View;
+ 
+ class FoodController extends Controller
+ {
+@@ -19,16 +20,11 @@
+      */
+     public function index()
+     {
+-        //Get data-Restaurants/Foods from DB
+-        $restaurants = Restaurant::where('user_id', Auth::id())
+-        ->orderBy('created_at', 'desc')
+-        ->get();
+-
+         $foods = Food::where('restaurant_id', Auth::id())
+-        ->orderBy('created_at', 'desc')
+-        ->get();
++            ->orderBy('created_at', 'desc')
++            ->get();
+ 
+-        return view('admin.foods.index', compact('restaurants', 'foods'));
++        return view('admin.foods.index', compact('foods'));
+     }
+ 
+     /**
+@@ -44,45 +40,39 @@
+     /**
+      * Store a newly created resource in storage.
+      *
+-     * @param  \Illuminate\Http\Request  $request
+-     * @return \Illuminate\Http\Response
++     * @param \Illuminate\Http\Request $request
++     * @return \Illuminate\Http\RedirectResponse
+      */
+-    public function store(Request $request)
++    public function store(
++        AdminFoodRequest $request,
++        ImageStore $imageStore,
++        SlugWithDash $slugWithDash
++    )
+     {
+         $data = $request->all();
+-
+-        //VALIDAZIONE
+-        $request->validate($this->ruleValidation());
+-
+-        // Salvare immagine in locale
+-        if(!empty($data['path_img'])){
+-            $data['path_img'] = Storage::disk('public')->put('images' , $data['path_img']);
++        $data['restaurant_id'] = Auth::id();
++        $data['slug'] = $slugWithDash($data['name']);
++        if (!empty($data['path_img'])) {
++            $data['path_img'] = $imageStore->save($request->file('path_img'));
+         }
+ 
+-        //SALVO DATI A DB
+-        $data['restaurant_id'] = Auth::id(); //attraverso AUTH generiamo lo slug del ristorante nella fase di autenticazione.
+-
+-        $data['slug'] = Str::slug($data['name'], '-');
++        $food = new Food();
++        $food->fill($data);
+ 
+-        $newFood = new Food();
+-        $newFood->fill($data);  //Facciamo fillable nel model!!!
+-
+-        $saved = $newFood->save();
+-
+-        if($saved) {
++        if ($food->save()) {
+             return redirect()->route('admin.foods.index');
+-        } else {
+-            return redirect()->route('admin.home');
+-        } //DA RIVEDERE ERRORS...
++        }
++
++        return redirect()->route('admin.home');
+     }
+ 
+     /**
+      * Display the specified resource.
+      *
+-     * @param  int  $id
++     * @param string $slug
+      * @return \Illuminate\Http\Response
+      */
+-    public function show($slug)
++    public function show(string $slug)
+     {
+         $food = Food::where('slug', $slug)->first();
+ 
+@@ -91,88 +81,50 @@
+ 
+     /**
+      * Show the form for editing the specified resource.
+-     *
+-     * @param  int  $id
+-     * @return \Illuminate\Http\Response
+      */
+-    public function edit(Food $food)
++    public function edit(Food $food): View
+     {
+         return view('admin.foods.edit', compact('food'));
+     }
+ 
+     /**
+      * Update the specified resource in storage.
+-     *
+-     * @param  \Illuminate\Http\Request  $request
+-     * @param  int  $id
+-     * @return \Illuminate\Http\Response
+      */
+-    public function update(Request $request, Food $food)
++    public function update(
++        AdminFoodRequest $request,
++        Food $food,
++        ImageStore $imageStore,
++        SlugWithDash $slugWithDash): RedirectResponse
+     {
+-        //Dati inviati dalla form di aggiornamento
+         $data = $request->all();
+-
+-        ///VALIDAZIONE
+-        $request->validate($this->ruleValidation());
+-
+-        // Salvare immagine in locale
+-        if(!empty($data['path_img'])) {
+-            if(!empty($food->path_img)) {
+-                Storage::disk('public')->delete($food->path_img);
+-            }
+-            $data['path_img'] = Storage::disk('public')->put('images', $data['path_img']);
+-        }
+-
+-        //AGGIORNO DATI A DB
+-        $data['restaurant_id'] = Auth::id(); //attraverso AUTH generiamo lo slug del ristorante nella fase di autenticazione.
+-
+-        $data['slug'] = Str::slug($data['name'], '-');
++        $data['path_img'] = $imageStore->replace($food->path_img, $request->file('path_img'));
++        $data['restaurant_id'] = Auth::id();
++        $data['slug'] = $slugWithDash($data['name']);
+ 
+         $newFood = new Food();
+-        $newFood->fill($data);  //Facciamo fillable nel model!!!
++        $newFood->fill($data);
+ 
+-        $updated = $food->update($data);
+-
+-        if($updated) {
++        if ($food->update($data)) {
+             return redirect()->route('admin.foods.index');
+-        } else {
+-            return redirect()->route('admin.home');
+-        } //DA RIVEDERE ERRORS...
++        }
++
++        return redirect()->route('admin.home');
+     }
+ 
+     /**
+      * Remove the specified resource from storage.
+-     *
+-     * @param  int  $id
+-     * @return \Illuminate\Http\Response
+      */
+-    public function destroy(Food $food)
++    public function destroy(Food $food, ImageStore $imageStore): RedirectResponse
+     {
+-        $ref = $food->name;
++        if (!$food->delete()) {
++            return redirect()->route('admin.home');
++        }
+ 
+-        $deleted = $food->delete();
+-
+-        if($deleted) {
+-            if(!empty($image)) {
+-                Storage::disk('public')->delete($image);
+-            }
+-            return redirect()->route('admin.foods.index')->with('deleted', $ref);
+-        } else {
+-            return redirect()->route('admin.home');
++        if (!empty($image)) {
++            $imageStore->delete($image);
+         }
+-    }
++
++        return redirect()->route('admin.foods.index')->with('deleted', $food->name);
+ 
+-    //UTILITY FUNCTIONS
+-    private function ruleValidation() {
+-        return [
+-            //QUA STABILIAMO LE INFO RICHIESTE PER PROCEDERE
+-            'name' => 'required | max: 200',
+-            // 'slug'=>notnull();
+-            'description' => 'required',
+-            'ingredients' => 'required | max: 255',
+-            'price' => 'required',
+-            'visibility' => 'required',
+-            'path_img' => 'image',
+-        ];
+     }
+ }
+Index: app/Http/Controllers/Admin/RestaurantController.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Http/Controllers/Admin/RestaurantController.php b/app/Http/Controllers/Admin/RestaurantController.php
+--- a/app/Http/Controllers/Admin/RestaurantController.php	(revision 4825edaf5b6397405df277a41f87dd5d2cb8602c)
++++ b/app/Http/Controllers/Admin/RestaurantController.php	(date 1623776996621)
+@@ -2,93 +2,80 @@
+ 
+ namespace App\Http\Controllers\Admin;
+ 
++use App\Genre;
+ use App\Http\Controllers\Controller;
+-use Illuminate\Http\Request;
++use App\Http\Requests\AdminRestaurantRequest;
+ use App\Restaurant;
+-use App\Genre;
++use App\Services\ImageStore;
++use App\Services\SlugWithDash;
++use Illuminate\Http\RedirectResponse;
+ use Illuminate\Support\Facades\Auth;
+-use Illuminate\Support\Facades\Storage;
+-use Illuminate\Support\Str;
++use Illuminate\View\View;
+ 
+ class RestaurantController extends Controller
+ {
+     /**
+      * Display a listing of the resource.
+-     *
+-     * @return \Illuminate\Http\Response
+      */
+-    public function index()
++    public function index(): View
+     {
+         //Get data-Restaurants from DB
+         $restaurants = Restaurant::where('user_id', Auth::id())
+-        ->orderBy('created_at', 'desc')
+-        ->get();
++            ->orderBy('created_at', 'desc')
++            ->get();
+ 
+-        $genres = Genre::all();
+-
+-        return view('admin.restaurants.index', compact('restaurants', 'genres'));
++        return view('admin.restaurants.index', compact('restaurants'));
+     }
+ 
+     /**
+      * Show the form for creating a new resource.
+-     *
+-     * @return \Illuminate\Http\Response
+      */
+-    public function create()
++    public function create(): View
+     {
+         $genres = Genre::all();
+-        // dd($genres);
+ 
+         return view('admin.restaurants.create', compact('genres'));
+     }
+ 
+     /**
+      * Store a newly created resource in storage.
+-     *
+-     * @param  \Illuminate\Http\Request  $request
+-     * @return \Illuminate\Http\Response
+      */
+-    public function store(Request $request)
++    public function store(
++        AdminRestaurantRequest $request,
++        ImageStore $imageStore,
++        SlugWithDash $slugWithDash
++    ): RedirectResponse
+     {
+         $data = $request->all();
+ 
+-        //VALIDAZIONE
+-        $request->validate($this->ruleValidation());
+-
+         // Salvare immagine in locale
+-        if(!empty($data['path_img'])){
+-            $data['path_img'] = Storage::disk('public')->put('images' , $data['path_img']);
++        if (!empty($data['path_img'])) {
++            $data['path_img'] = $imageStore->save($request->file('path_img'));
+         }
+ 
+         //SALVO DATI A DB
+         $data['user_id'] = Auth::id(); //attraverso AUTH generiamo lo slug del ristorante nella fase di autenticazione.
+ 
+-        $data['slug'] = Str::slug($data['name'], '-');
++        $data['slug'] = $slugWithDash($data['name']);
+ 
+         $newRestaurant = new Restaurant();
+         $newRestaurant->fill($data);  //Facciamo fillable nel model!!!
+ 
+-        $saved = $newRestaurant->save();
+-
+-        if($saved) {
++        if (!$newRestaurant->save()) {
++            return redirect()->route('admin.home');
++        }
+ 
+-            if(!empty($data['genres'])) {
+-                $newRestaurant->genres()->attach($data['genres']);
+-            }
++        if (!empty($data['genres'])) {
++            $newRestaurant->genres()->attach($data['genres']);
++        }
+ 
+-            return redirect()->route('admin.restaurants.index');
+-        } else {
+-            return redirect()->route('admin.home');
+-        } //DA RIVEDERE ERRORS...
++        return redirect()->route('admin.restaurants.index');
+     }
+ 
+     /**
+      * Display the specified resource.
+-     *
+-     * @param  int  $id
+-     * @return \Illuminate\Http\Response
+      */
+-    public function show($slug)
++    public function show(string $slug): View
+     {
+         $restaurant = Restaurant::where('slug', $slug)->first();
+ 
+@@ -97,11 +84,8 @@
+ 
+     /**
+      * Show the form for editing the specified resource.
+-     *
+-     * @param  int  $id
+-     * @return \Illuminate\Http\Response
+      */
+-    public function edit(Restaurant $restaurant)
++    public function edit(Restaurant $restaurant): View
+     {
+         $genres = Genre::all();
+ 
+@@ -110,96 +94,56 @@
+ 
+     /**
+      * Update the specified resource in storage.
+-     *
+-     * @param  \Illuminate\Http\Request  $request
+-     * @param  int  $id
+-     * @return \Illuminate\Http\Response
+      */
+-    public function update(Request $request, Restaurant $restaurant)
++    public function update(
++        AdminRestaurantRequest $request,
++        Restaurant $restaurant,
++        ImageStore $imageStore,
++        SlugWithDash $slugWithDash): RedirectResponse
+     {
+         //Dati inviati dalla form di aggiornamento
+         $data = $request->all();
+ 
+-        ///VALIDAZIONE
+-        $request->validate($this->ruleValidation());
+-
+         //SLUG
+-        $data['slug'] = Str::slug($data['name'], '-');
++        $data['slug'] = $slugWithDash($data['name']);
+ 
+-        // Salvare immagine in locale
+-        if(!empty($data['path_img'])) {
++        $data['path_img'] = $imageStore->replace($restaurant->path_img, $request->file('path_img'));
+ 
+-            //Cancella l'immagine eventualmente precedente
+-            if(!empty($restaurant->path_img)) {
+-                Storage::disk('public')->delete($restaurant->path_img);
+-            }
+-            $data['path_img'] = Storage::disk('public')->put('images', $data['path_img']);
++        if (!$restaurant->update($data)) {
++            return redirect()->route('admin.home');
+         }
+-
+-
+-        //AGGIORNO DATI A DB
+-        // $data['user_id'] = Auth::id(); //attraverso AUTH generiamo lo slug del ristorante nella fase di autenticazione.
+-
+-        // $newRestaurant = new Restaurant();
+-        // $newRestaurant->fill($data);  //Facciamo fillable nel model!!!
+-
+-        $updated = $restaurant->update($data);
+-
+-        if($updated) {
+ 
+-            if (!empty($data['genres'])) {
+-                //Sincronizza con precedenti generi indicati
+-                $restaurant->genres()->sync($data['genres']);
+-            } else {
+-                //Se non c'è sync con precedenti generi indicati elimina i vecchi
+-                $restaurant->genres()->detach();
+-            }
++        if (!empty($data['genres'])) {
++            //Sincronizza con precedenti generi indicati
++            $restaurant->genres()->sync($data['genres']);
++        } else {
++            //Se non c'è sync con precedenti generi indicati elimina i vecchi
++            $restaurant->genres()->detach();
++        }
+ 
+-            return redirect()->route('admin.restaurants.index');
+-        } else {
+-            return redirect()->route('admin.home');
+-        } //DA RIVEDERE ERRORS...
++        return redirect()->route('admin.restaurants.index');
++
+     }
+ 
+     /**
+      * Remove the specified resource from storage.
+-     *
+-     * @param  int  $id
+-     * @return \Illuminate\Http\Response
+      */
+-    public function destroy(Restaurant $restaurant)
++    public function destroy(Restaurant $restaurant, ImageStore $imageStore): RedirectResponse
+     {
+-        $ref = $restaurant->name;
+         $image = $restaurant->path_img;
+ 
+         $restaurant->genres()->detach();
+ 
+-        $deleted = $restaurant->delete();
++        if (!$restaurant->delete()) {
++            return redirect()->route('admin.home');
++        }
+ 
+-        if($deleted) {
+-            if(!empty($image)) {
+-                Storage::disk('public')->delete($image);
+-            }
+-            return redirect()->route('admin.restaurants.index')->with('deleted', $ref);
+-        } else {
+-            return redirect()->route('admin.home');
++        if (!empty($image)) {
++            $imageStore->delete($image);
+         }
+ 
+-    }
++        return redirect()->route('admin.restaurants.index')->with('deleted', $restaurant->name);
+ 
+-    //UTILITY FUNCTIONS
+-    private function ruleValidation() {
+-        return [
+-            //QUA STABILIAMO LE INFO RICHIESTE PER PROCEDERE
+-            'name' => 'required | max: 100',
+-            // 'slug'=>notnull();
+-            'email' => 'required | max: 50',
+-            'phone_number' => 'required | max: 30',
+-            'vat_number' => 'required | max: 11',
+-            'address' => 'required | max: 50',
+-            'description' => 'required',
+-            'path_img' => 'image',
+-        ];
+     }
+ }
+ 
