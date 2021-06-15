@@ -21,17 +21,20 @@ class Restaurant extends Model
 
 
     //Relazione del DB: RESTAURANT - USERS
-    public function User() {
-        return $this->belongsTo('App\User');
+    public function User()
+    {
+        return $this->belongsTo(User::class);
     }
 
     //Relazione del DB: RESTAURANT - FOODS
-    public function Foods() {
-        return $this->hasMany('App\Food');
+    public function Foods()
+    {
+        return $this->hasMany(Food::class);
     }
 
-    //Relazione del DB: RESTAURANTS - GENRES 
-    public function Genres() {
-        return $this->belongsToMany('App\Genre');
+    //Relazione del DB: RESTAURANTS - GENRES
+    public function Genres()
+    {
+        return $this->belongsToMany(Genre::class);
     }
 }

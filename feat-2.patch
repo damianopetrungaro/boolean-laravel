@@ -1,0 +1,184 @@
+Index: app/Order.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Order.php b/app/Order.php
+--- a/app/Order.php	(revision 30ece2cbac8cba4b527509a05da0ad9c4073f2f2)
++++ b/app/Order.php	(date 1621695891431)
+@@ -7,22 +7,25 @@
+ class Order extends Model
+ {
+     //MASS ASSIGNMENT
++    public $timestamps = false;
++
++    //Questo permette a laravel di non creare in automatico created_at & updated_at
+     protected $fillable = [
+         'total_price',
+         'email',
+         'address',
+     ];
+ 
+-    //Questo permette a laravel di non creare in automatico created_at & updated_at
+-    public $timestamps = false;
+-
+-    //Relazione del DB: ORDERS - FOODS 
+-    public function Foods() {
+-        return $this->belongsToMany('App\Food');
++    //Relazione del DB: ORDERS - FOODS
++
++    public function Foods()
++    {
++        return $this->belongsToMany(Food::class);
+     }
+ 
+     //Relazione del DB: ORDER - UI
+-    public function Ui() {
+-        return $this->hasOne('App\Ui');
++    public function Ui()
++    {
++        return $this->hasOne(Ui::class);
+     }
+ }
+Index: app/Restaurant.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Restaurant.php b/app/Restaurant.php
+--- a/app/Restaurant.php	(revision 30ece2cbac8cba4b527509a05da0ad9c4073f2f2)
++++ b/app/Restaurant.php	(date 1621695864695)
+@@ -21,17 +21,20 @@
+ 
+ 
+     //Relazione del DB: RESTAURANT - USERS
+-    public function User() {
+-        return $this->belongsTo('App\User');
++    public function User()
++    {
++        return $this->belongsTo(User::class);
+     }
+ 
+     //Relazione del DB: RESTAURANT - FOODS
+-    public function Foods() {
+-        return $this->hasMany('App\Food');
++    public function Foods()
++    {
++        return $this->hasMany(Food::class);
+     }
+ 
+-    //Relazione del DB: RESTAURANTS - GENRES 
+-    public function Genres() {
+-        return $this->belongsToMany('App\Genre');
++    //Relazione del DB: RESTAURANTS - GENRES
++    public function Genres()
++    {
++        return $this->belongsToMany(Genre::class);
+     }
+ }
+Index: app/Genre.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Genre.php b/app/Genre.php
+--- a/app/Genre.php	(revision 30ece2cbac8cba4b527509a05da0ad9c4073f2f2)
++++ b/app/Genre.php	(date 1621695891433)
+@@ -7,16 +7,18 @@
+ class Genre extends Model
+ {
+     //MASS ASSIGNMENT
++    public $timestamps = false;
++
++    //Questo permette a laravel di non creare in automatico created_at & updated_at
+     protected $fillable = [
+         'type',
+         'img',
+     ];
+ 
+-    //Questo permette a laravel di non creare in automatico created_at & updated_at
+-    public $timestamps = false;
+-
+     //Relazione del DB: GENRES - RESTAURANTS
+-    public function Restaurants() {
+-        return $this->belongsToMany('App\Restaurant');
++
++    public function Restaurants()
++    {
++        return $this->belongsToMany(Restaurant::class);
+     }
+ }
+Index: app/User.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/User.php b/app/User.php
+--- a/app/User.php	(revision 30ece2cbac8cba4b527509a05da0ad9c4073f2f2)
++++ b/app/User.php	(date 1621695891440)
+@@ -2,7 +2,6 @@
+ 
+ namespace App;
+ 
+-use Illuminate\Contracts\Auth\MustVerifyEmail;
+ use Illuminate\Foundation\Auth\User as Authenticatable;
+ use Illuminate\Notifications\Notifiable;
+ 
+@@ -38,7 +37,8 @@
+     ];
+ 
+     //Relazione del DB: USERS - RESTAURANT
+-    public function Restaurants() {
+-        return $this->hasMany('App\Restaurant');
++    public function Restaurants()
++    {
++        return $this->hasMany(Restaurant::class);
+     }
+ }
+Index: app/Food.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Food.php b/app/Food.php
+--- a/app/Food.php	(revision 30ece2cbac8cba4b527509a05da0ad9c4073f2f2)
++++ b/app/Food.php	(date 1621695891436)
+@@ -19,12 +19,14 @@
+     ];
+ 
+     //Relazione del DB: FOODS - RESTAURANT
+-    public function Restaurant() {
+-        return $this->belongsTo('App\Restaurant');
++    public function Restaurant()
++    {
++        return $this->belongsTo(Restaurant::class);
+     }
+ 
+-    //Relazione del DB: FOODS - ORDERS 
+-    public function Orders() {
+-        return $this->belongsToMany('App\Order');
++    //Relazione del DB: FOODS - ORDERS
++    public function Orders()
++    {
++        return $this->belongsToMany(Order::class);
+     }
+ }
+Index: app/Ui.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/Ui.php b/app/Ui.php
+--- a/app/Ui.php	(revision 30ece2cbac8cba4b527509a05da0ad9c4073f2f2)
++++ b/app/Ui.php	(date 1621695902562)
+@@ -7,7 +7,8 @@
+ class Ui extends Model
+ {
+     //Relazione del DB: UI - ORDER
+-    public function Order() {
+-        return $this->belongsTo('App\Order');
++    public function Order()
++    {
++        return $this->belongsTo(Order::class);
+     }
+ }

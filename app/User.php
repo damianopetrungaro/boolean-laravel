@@ -2,7 +2,6 @@
 
 namespace App;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -38,7 +37,8 @@ class User extends Authenticatable
     ];
 
     //Relazione del DB: USERS - RESTAURANT
-    public function Restaurants() {
-        return $this->hasMany('App\Restaurant');
+    public function Restaurants()
+    {
+        return $this->hasMany(Restaurant::class);
     }
 }
